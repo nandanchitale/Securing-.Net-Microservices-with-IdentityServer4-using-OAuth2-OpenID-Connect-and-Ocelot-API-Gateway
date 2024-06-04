@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-secret
+  labels:
+    app: postgres
+data:
+  POSTGRES_DB: movies
+  POSTGRES_USER: sa
+  POSTGRES_PASSWORD: pa55w0rd!

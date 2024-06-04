@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movies-api-depl
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels: 
+      app: movieapiservice
+  template:
+    metadata:
+      lables:
+        app: movieapiservice
+    spec: 
+      containers:
+        - name: movieapiservice
+          image : nandanchitale/secure-microservices:movieapi_latest
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: movieapiservice-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: movieapiservice
+  ports:
+    - name: movieapiservice
+      protocol: TCP
+      port: 80
+      targetPort: 5089 # Docker container port
