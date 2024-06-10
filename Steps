@@ -5,4 +5,7 @@
 5> Add API Logic
 6> Test API (locally)
 7> Migrate DB (dotnet ef migrations add initialmigration -> Gives error -> Change program.cs -> Comment in memory database initialization part)
-8> Test API (docker)
+8> Add Postgresql Deployment for Kubernetes
+9> Add Movies API Deployment for kubernetes
+10> Add Nginx Ingress Deployment to access Movies API inside Kubernetes
+12> Test API for Kubernetes (It should fetch data from database instead of In Memory Database)

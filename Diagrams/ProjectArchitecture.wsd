@@ -1,0 +1,19 @@
+@startuml Securing Dotnet API with Ocelate
+
+title High Level Architecture - Securing Dotnet API with Ocelate
+
+actor "End User" as eu
+
+node "Movies API Client" as moviesClient
+node "Ocelate API Gateway" as ocelate
+node "IdentityServer" as identityServer
+node "MoviesAPI" as moviesAPI
+
+eu -->> moviesClient
+moviesClient <<-->> ocelate : "Send Rquest + Token"
+ocelate <<--->> moviesAPI : "Access Protected Resources"
+ocelate <<--->> identityServer
+moviesAPI <<--->> identityServer : "Validate Token and Authorized with Service Info"
+moviesClient <<--->> identityServer : "Get and Return Token from Auth Request"
+' ocelate --->> moviesClient : "Send Rquest + Token"
+@enduml
