@@ -12,4 +12,5 @@ public interface IMoviesRepository
     IEnumerable<Movie> GetAllMatchingMovies(string movieName);
 
     void CreateMovie(Movie movie);
+    (bool, Movie) isMovieAlreadyExists(string movieName);
 }

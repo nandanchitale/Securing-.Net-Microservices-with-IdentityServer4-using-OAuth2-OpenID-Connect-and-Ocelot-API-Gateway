@@ -26,7 +26,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // Setup Postgresql database
-if (builder.Environment.IsProduction())
+if (builder.Environment.IsProduction()) // Comment this line and else block while applying migrations 
 {
     Console.WriteLine($"--> Application Environment IsProduction ? {builder.Environment.IsProduction()}");
     Console.WriteLine("--> Using Postgresql DB");
@@ -73,7 +73,7 @@ app.UseHttpsRedirection();
 
 app.MapControllers();
 
-PrepDb.PrepPopulation(app, app.Environment.IsProduction());
+PrepDb.PrepPopulation(app, app.Environment.IsProduction()); // Comment this line while applying migrations
 
 app.Run();
 

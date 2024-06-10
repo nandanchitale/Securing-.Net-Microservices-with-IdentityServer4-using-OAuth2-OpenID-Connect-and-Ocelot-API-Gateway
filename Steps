@@ -1,0 +1,8 @@
+1> Create Project (dotnet new "webapi" -lang "C#" -n "Movies.API" -o "Movies.API" )
+2> Add Appdbcontext
+3> Add IRepository and Repository with appropriate methods
+4> Add Local storage mechanism (in memory database)
+5> Add API Logic
+6> Test API (locally)
+7> Migrate DB (dotnet ef migrations add initialmigration -> Gives error -> Change program.cs -> Comment in memory database initialization part)
+8> Test API (docker)

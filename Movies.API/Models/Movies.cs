@@ -10,9 +10,10 @@ public class Movie
     [Required]
     public string Title { get; set; }
     [Required]
-    public string Genre {get;set;}
+    public string Genre { get; set; }
     [Required]
     public DateTime ReleaseDate { get; set; }
     [Required]
     public string Owner { get; set; }
+    public string Status { get; set; } = Utils.Constants.Status.ACTIVE;
 }

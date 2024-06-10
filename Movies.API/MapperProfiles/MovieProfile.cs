@@ -10,6 +10,6 @@ public class MovieProfile : Profile
     {
         // source --> destination
         CreateMap<Movie, MovieReadDto>();
-        CreateMap<MovieCreateDto, Movie>();
+        CreateMap<MovieDetailDto, Movie>();
     }
 }

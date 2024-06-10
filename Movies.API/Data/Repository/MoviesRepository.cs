@@ -1,5 +1,6 @@
 using Movies.API.Data.IRepository;
 using Movies.API.Model;
+using Movies.API.Utils.Constants;
 
 namespace Movies.API.Data.Repository;
 
@@ -22,19 +23,32 @@ public class MoviesRepository : IMoviesRepository
 
         return _context.Movies.Where(
             rec => rec.Title.ToLower().Equals(movieName.ToLower())
+            && rec.Status.Equals(Status.ACTIVE)
         ).AsEnumerable();
     }
 
     public IEnumerable<Movie> GetAllMovies()
     {
-        return _context.Movies.AsEnumerable().OrderBy(rec => rec.Id);
+        return _context.Movies.Where(rec=>rec.Status.Equals(Status.ACTIVE)).AsEnumerable().OrderBy(rec => rec.Id);
     }
 
     public Movie? GetMovieById(int id)
     {
         return _context.Movies.Where(
-            rec => rec.Id.Equals(id)
+            rec => rec.Id.Equals(id) 
+            && rec.Status.Equals(Status.ACTIVE)
         ).FirstOrDefault();
+    }
+
+    public (bool, Movie) isMovieAlreadyExists(string movieName){
+        bool isMovieActive = false;
+        Movie movie = _context.Movies.Where(
+            rec=>rec.Title.ToLower().Equals(movieName.ToLower())
+        ).FirstOrDefault();
+
+        if(movie is not null) isMovieActive = movie.Status.Equals(Status.ACTIVE);
+
+        return (isMovieActive, movie);
     }
 
     public bool SaveChanges()

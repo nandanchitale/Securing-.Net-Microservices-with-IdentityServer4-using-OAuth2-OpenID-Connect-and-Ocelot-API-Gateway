@@ -43,14 +43,14 @@ public static class PrepDb
                         Title = "The Shawshank Redemption",
                         Genre = "Drama",
                         ReleaseDate = DateTime.Parse("1994-09-23"),
-                        Owner = "John Doe"
+                        Owner = "John Doe",
                     },
                     new Movie()
                     {
                         Title = "The Godfather",
                         Genre = "Crime",
                         ReleaseDate = DateTime.Parse("1972-03-15"),
-                        Owner = "Jane Smith"
+                        Owner = "Jane Smith",
                     },
 
                     new Movie()
@@ -58,7 +58,7 @@ public static class PrepDb
                         Title = "Inception",
                         Genre = "Action",
                         ReleaseDate = DateTime.Parse("2010-07-16"),
-                        Owner = "Bob Johnson"
+                        Owner = "Bob Johnson",
                     }
                 );
                 context.SaveChanges();

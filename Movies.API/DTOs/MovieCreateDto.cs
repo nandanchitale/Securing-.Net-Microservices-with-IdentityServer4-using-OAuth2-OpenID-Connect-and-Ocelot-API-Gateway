@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Movies.API.DTO;
 
-public class MovieCreateDto
+public class MovieDetailDto
 {
     [Required]
     public string Title { get; set; }
