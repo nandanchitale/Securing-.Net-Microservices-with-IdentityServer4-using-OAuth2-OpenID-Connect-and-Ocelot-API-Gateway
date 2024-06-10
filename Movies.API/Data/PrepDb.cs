@@ -3,7 +3,7 @@ using Movies.API.Model;
 
 namespace Movies.API.Data;
 
-public class PrepDb
+public static class PrepDb
 {
     public static void PrepPopulation(
         IApplicationBuilder app,

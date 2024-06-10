@@ -58,8 +58,9 @@ public class MoviesController : ControllerBase
         return response;
     }
 
+
     [HttpPut]
-    public async Task<IActionResult> PutMovie(MovieCreateDto movieCreateDto)
+    public IActionResult PutMovie(MovieCreateDto movieCreateDto)
     {
         IActionResult response = NoContent();
         try

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="Custom Ruleset" Description="Custom ruleset for enforcing coding standards" ToolsVersion="15.0">
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+    <!-- Enforce XML documentation comments on public members -->
+    <Rule Id="CS1591" Action="Error" />
+  </Rules>
+</RuleSet>
