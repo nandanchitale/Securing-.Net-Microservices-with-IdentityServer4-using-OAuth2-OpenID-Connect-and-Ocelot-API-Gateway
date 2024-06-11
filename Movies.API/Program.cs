@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Movies.API.Data;
 using Movies.API.Data.IRepository;
@@ -11,8 +12,28 @@ var builder = WebApplication.CreateBuilder(args);
 // Add Controllers Serivce
 builder.Services.AddControllers();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
+// Add JWT Authentication
+builder.Services
+    .AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
+    {
+        options.Authority = builder.Configuration.GetSection("IdentityServerURL").Value;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = false
+        };
+        options.RequireHttpsMetadata = false;
+    });
+
+// Add Claim based Authorization
+builder.Services
+    .AddAuthorization(
+        options => options.AddPolicy(
+            "ClientIdPolicy",
+            policy => policy.RequireClaim("client_id", "moviesClient")
+        )
+    );
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -71,10 +92,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
+
 app.MapControllers();
 
 PrepDb.PrepPopulation(app, app.Environment.IsProduction()); // Comment this line while applying migrations
 
 app.Run();
-
-

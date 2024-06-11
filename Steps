@@ -9,3 +9,7 @@
 9> Add Movies API Deployment for kubernetes
 10> Add Nginx Ingress Deployment to access Movies API inside Kubernetes
 12> Test API for Kubernetes (It should fetch data from database instead of In Memory Database)
+13> Add Code for Identity Server with Token Based Authorization
+14> Make Movies API to authorize with Identity server using JWT
+15> Test Code Locally
+16> Add Claim based authorization to have claim based requests.

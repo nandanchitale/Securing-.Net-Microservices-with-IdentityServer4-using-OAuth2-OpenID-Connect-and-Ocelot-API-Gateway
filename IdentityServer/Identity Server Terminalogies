@@ -1,0 +1,8 @@
+Identity Server 4 Clients, Resources, Scopes and Test Users
+
+1> Api Resource : Resouce you want to protect. (Datasource)
+2> API Scopes : What client application is allowed to do
+3> Clients : Identity Server needs to know what client applications are allowed to use
+4> Identity Resource : Information that includes user info. Defined with Identity Token
+5> Test Users : Test users to access client API
+6> Developer Signing Credentials : Dev only. (ssl key certificate)
