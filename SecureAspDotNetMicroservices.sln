@@ -7,6 +7,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Movies.API", "Movies.API\Mo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer", "IdentityServer\IdentityServer.csproj", "{89A525A0-A99F-431A-B970-978D396F800A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Movies.Client", "Movies.Client\Movies.Client.csproj", "{4859357D-6C42-4829-9FEB-9B3B1323A373}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Movies.Models", "Movies.Models\Movies.Models.csproj", "{A76F1A99-916B-47C1-B580-2FB8CEAABB20}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Movies.Utils", "Movies.Utils\Movies.Utils.csproj", "{C8A706A3-EF21-4F71-9E4D-8E33B89C4A6B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Movies.DataAccess", "Movies.DataAccess\Movies.DataAccess.csproj", "{52756966-68AB-40D2-A718-39570819C629}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +32,21 @@ Global
 		{89A525A0-A99F-431A-B970-978D396F800A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89A525A0-A99F-431A-B970-978D396F800A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89A525A0-A99F-431A-B970-978D396F800A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4859357D-6C42-4829-9FEB-9B3B1323A373}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4859357D-6C42-4829-9FEB-9B3B1323A373}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4859357D-6C42-4829-9FEB-9B3B1323A373}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4859357D-6C42-4829-9FEB-9B3B1323A373}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A76F1A99-916B-47C1-B580-2FB8CEAABB20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A76F1A99-916B-47C1-B580-2FB8CEAABB20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A76F1A99-916B-47C1-B580-2FB8CEAABB20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A76F1A99-916B-47C1-B580-2FB8CEAABB20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8A706A3-EF21-4F71-9E4D-8E33B89C4A6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8A706A3-EF21-4F71-9E4D-8E33B89C4A6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8A706A3-EF21-4F71-9E4D-8E33B89C4A6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8A706A3-EF21-4F71-9E4D-8E33B89C4A6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52756966-68AB-40D2-A718-39570819C629}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52756966-68AB-40D2-A718-39570819C629}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52756966-68AB-40D2-A718-39570819C629}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52756966-68AB-40D2-A718-39570819C629}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

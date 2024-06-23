@@ -13,3 +13,4 @@
 14> Make Movies API to authorize with Identity server using JWT
 15> Test Code Locally
 16> Add Claim based authorization to have claim based requests.
+17> Add Identity Server on Kubernetes

@@ -1,39 +1,47 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Movies.API.Data;
-using Movies.API.Data.IRepository;
-using Movies.API.Data.Repository;
+using Movies.DataAccess;
+using Movies.DataAccess.IRepository;
+using Movies.DataAccess.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+string IdentityServerUrl = builder.Configuration.GetSection("IdentityServerURL").Value;
+string DatabaseConnectionString = builder.Configuration.GetConnectionString("MoviesAPIConnection");
 
-// Add Controllers Serivce
+Console.WriteLine($"--> IdentityServerUrl : {IdentityServerUrl}");
+
+// Add services to the container.
 builder.Services.AddControllers();
 
-// Add JWT Authentication
 builder.Services
-    .AddAuthentication("Bearer")
-    .AddJwtBearer("Bearer", options =>
+    .AddAuthentication(options =>
     {
-        options.Authority = builder.Configuration.GetSection("IdentityServerURL").Value;
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+    {
+        options.Authority = IdentityServerUrl;
+        options.Audience = "moviesAPI";
+        options.RequireHttpsMetadata = false;
+        options.UseSecurityTokenValidators = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
+            ValidateIssuer = false,
+            // ValidIssuer = IdentityServerUrl,
+            // ValidateAudience = true,
+            // ValidAudience = ProjectProperties.Audience
+            LogValidationExceptions = false,
+            ValidateIssuerSigningKey = false,
             ValidateAudience = false
         };
-        options.RequireHttpsMetadata = false;
     });
 
-// Add Claim based Authorization
-builder.Services
-    .AddAuthorization(
-        options => options.AddPolicy(
-            "ClientIdPolicy",
-            policy => policy.RequireClaim("client_id", "moviesClient")
-        )
-    );
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle builder.Services.AddEndpointsApiExplorer();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle 
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -47,19 +55,16 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // Setup Postgresql database
-if (builder.Environment.IsProduction()) // Comment this line and else block while applying migrations 
+if (builder.Environment.IsProduction())
 {
     Console.WriteLine($"--> Application Environment IsProduction ? {builder.Environment.IsProduction()}");
     Console.WriteLine("--> Using Postgresql DB");
-    Console.WriteLine($"--> Connection String : {builder.Configuration.GetConnectionString("MoviesAPIConnection")}");
+    Console.WriteLine($"--> Connection String : {DatabaseConnectionString}");
 
-    _ = builder.Services.AddDbContext<AppDbContext>(
-        opt => opt.UseNpgsql(
-            builder.Configuration.GetConnectionString("MoviesAPIConnection")
-        )
+    builder.Services.AddDbContext<AppDbContext>(
+        opt => opt.UseNpgsql(DatabaseConnectionString, b => b.MigrationsAssembly("Movies.API"))
     );
 }
-// Setup in memory database
 else
 {
     Console.WriteLine("--> Using InMem DB");
@@ -77,10 +82,9 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwaggerUI(options => // UseSwaggerUI is called only in Development.
+    app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
         options.RoutePrefix = String.Empty;
@@ -90,16 +94,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+
+// app.UseRouting();
 
 app.UseRouting();
-
-app.UseAuthentication();
-
+app.UseAuthentication(); // this one first
 app.UseAuthorization();
-
 app.MapControllers();
 
-PrepDb.PrepPopulation(app, app.Environment.IsProduction()); // Comment this line while applying migrations
+PrepDb.PrepPopulation(app, app.Environment.IsProduction());
 
 app.Run();

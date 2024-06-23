@@ -16,4 +16,35 @@ spec:
               service:
                 name: movieapiservice-clusterip-srv
                 port:
-                  number: 5089
+                  number: 80
+          - path: /api/Identity
+            pathType: Prefix
+            backend:
+              service:
+                name: movieapiservice-clusterip-srv
+                port:
+                  number: 80
+    - host: identity.acme.com
+      http:
+        paths: # This should be directly under `http`, not nested
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: identityserver-clusterip-srv
+                port:
+                  number: 5041
+          - path: /connect
+            pathType: Prefix
+            backend:
+              service:
+                name: identityserver-clusterip-srv
+                port:
+                  number: 5041
+          - path: /.well-known
+            pathType: Prefix
+            backend:
+              service:
+                name: identityserver-clusterip-srv
+                port:
+                  number: 5041

@@ -1,18 +1,15 @@
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Movies.API.Data;
-using Movies.API.Data.IRepository;
-using Movies.API.Data.Repository;
 using Movies.API.DTO;
-using Movies.API.Model;
-using Movies.API.Utils.Constants;
+using Movies.DataAccess.IRepository;
+using Movies.Utils.Constants;
+using Movie = Movies.Models.Movies;
 
 namespace Movies.API.Controller;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize("ClientIdPolicy")]
+// [Authorize]
 public class MoviesController : ControllerBase
 {
     private readonly IMoviesRepository _repository;
@@ -33,6 +30,11 @@ public class MoviesController : ControllerBase
         IActionResult response = NoContent();
         try
         {
+            var data = Request.Headers.Values;
+            foreach (var value in data)
+            {
+                Console.WriteLine($"--> {value}");
+            }
             IEnumerable<Movie> movies = _repository.GetAllMovies();
             response = Ok(movies);
         }
@@ -176,7 +178,7 @@ public class MoviesController : ControllerBase
             movie.ReleaseDate = movieDetailDto.ReleaseDate;
             movie.Status = Status.ACTIVE;
 
-            returnValue = movie; 
+            returnValue = movie;
         }
         catch (Exception ex)
         {

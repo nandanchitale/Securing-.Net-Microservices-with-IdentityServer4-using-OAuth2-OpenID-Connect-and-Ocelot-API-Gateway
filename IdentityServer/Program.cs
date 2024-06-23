@@ -1,61 +1,83 @@
 using IdentityServer4;
-using IdentityServer4.Models;
-using IdentityServer4.Test;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// var signingKey = JwtTokenConfig.GetIssuerSigningKey(builder.Configuration);
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// builder.Services.AddEndpointsApiExplorer();
+// builder.Services.AddSwaggerGen();
 
-builder.Services.AddControllers();
+builder.Services.AddControllersWithViews();
 
 // Add Identity Server
-builder.Services.AddIdentityServer()
+builder
+    .Services.AddIdentityServer()
     .AddInMemoryClients(Config.clients)
-    // .AddInMemoryIdentityResources(Config.identityResources)
-    // .AddInMemoryApiResources(Config.apiResources)
     .AddInMemoryApiScopes(Config.apiScopes)
-    // .AddTestUsers(Config.testUsers)
+    .AddInMemoryIdentityResources(Config.identityResources)
+    .AddTestUsers(Config.testUsers)
     .AddDeveloperSigningCredential();
+
+// Configure cookie policy
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
+    options.OnAppendCookie = cookieContext =>
+        CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
+    options.OnDeleteCookie = cookieContext =>
+        CheckSameSite(cookieContext.Context, cookieContext.CookieOptions);
+});
+
+// Configure the application cookie to be secure
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    // app.UseSwagger();
+    //  app.UseSwaggerUI();
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
+app.UseStaticFiles();
+app.UseRouting();
 app.UseIdentityServer();
+app.UseAuthorization();
+app.UseCookiePolicy();
 
-var summaries = new[]
+app.UseEndpoints(endpoints =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapDefaultControllerRoute();
+    });
+});
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+// app.MapControllers();
+
+// app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+void CheckSameSite(HttpContext httpContext, CookieOptions options)
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    if (options.SameSite == SameSiteMode.None)
+    {
+        options.Secure = true;
+    }
 }
+

@@ -1,6 +1,6 @@
 using AutoMapper;
 using Movies.API.DTO;
-using Movies.API.Model;
+using Movie = Movies.Models.Movies;
 
 namespace Movies.API.MapperProfiles;
 
