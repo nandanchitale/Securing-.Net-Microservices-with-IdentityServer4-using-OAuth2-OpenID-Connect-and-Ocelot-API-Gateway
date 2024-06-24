@@ -1,18 +1,18 @@
-using IdentityModel;
-using Microsoft.AspNetCore.Authentication;
+using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Movies.Client.ApiServices.Implementation;
 using Movies.Client.ApiServices.Interfaces;
+using Movies.Client.HttpHandlers;
 using Movies.DataAccess;
 using Movies.DataAccess.IRepository;
 using Movies.DataAccess.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
-string IdentityServerUrl = builder.Configuration.GetSection("IdentityServerURL").Value;
+string IdentityServerUrl = builder.Configuration["IdentityServer:Host"];
 string DatabaseConnectionString = builder.Configuration.GetConnectionString("MoviesAPIConnection");
 
 Console.WriteLine($"--> IdentityServerUrl : {IdentityServerUrl}");
@@ -32,8 +32,8 @@ builder
     {
         options.Authority = IdentityServerUrl;
         options.RequireHttpsMetadata = false;
-        options.ClientId = "movies_mvc_client";
-        options.ClientSecret = "secret";
+        options.ClientId = builder.Configuration["IdentityServer:ClientId"];
+        options.ClientSecret = builder.Configuration["IdentityServer:ClientSecret"];
         options.ResponseType = "code";
 
         options.Scope.Add("openid");
@@ -48,33 +48,46 @@ builder.Logging.AddConsole();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
-// Setup Postgresql database
-if (builder.Environment.IsProduction())
-{
-    Console.WriteLine(
-        $"--> Application Environment IsProduction ? {builder.Environment.IsProduction()}"
-    );
-    Console.WriteLine("--> Using Postgresql DB");
-    Console.WriteLine($"--> Connection String : {DatabaseConnectionString}");
-
-    builder.Services.AddDbContext<AppDbContext>(opt =>
-        opt.UseNpgsql(DatabaseConnectionString, b => b.MigrationsAssembly("Movies.API"))
-    );
-}
-else
-{
-    Console.WriteLine("--> Using InMem DB");
-    _ = builder.Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("InMemoryDb"));
-}
+Console.WriteLine("--> Using InMem DB");
+_ = builder.Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("InMemoryDb"));
 
 // Repository DI
 builder.Services.AddScoped<IMoviesRepository, MoviesRepository>();
 
 // Services
 builder.Services.AddScoped<IMovieService, MovieApiService>();
+builder.Services.AddScoped<IApiHandlerService, ApiHandlerService>();
 
 // Automapper DI
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+// Create HttpClient used for accessing movies api
+builder.Services.AddTransient<AuthenticationDelegationHandler>();
+builder.Services
+    .AddHttpClient(builder.Configuration["IdentityServer:ClientId"], client =>
+    {
+        client.BaseAddress = new Uri(builder.Configuration["MoviesAPI"]);
+        client.DefaultRequestHeaders.Clear();
+        client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+    })
+    .AddHttpMessageHandler<AuthenticationDelegationHandler>();
+
+// HttpClient to access Identity Server
+builder.Services
+    .AddHttpClient(builder.Configuration["IdentityServer:Id"], client =>
+    {
+        client.BaseAddress = new Uri(builder.Configuration["IdentityServer:Host"]);
+        client.DefaultRequestHeaders.Clear();
+        client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+    });
+
+builder.Services.AddSingleton(new ClientCredentialsTokenRequest
+{
+    Address = $"{builder.Configuration["IdentityServer:Host"]}/connect/token",
+    ClientId = builder.Configuration["IdentityServer:ClientId"],
+    ClientSecret = builder.Configuration["IdentityServer:ClientSecret"],
+    Scope = builder.Configuration["IdentityServer:Scope"],
+});
 
 var app = builder.Build();
 

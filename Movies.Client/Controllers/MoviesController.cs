@@ -1,8 +1,12 @@
 using System.Diagnostics;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Movies.Client.ApiServices.Interfaces;
 using Movies.DataAccess;
 using Movies.DataAccess.IRepository;
 using Movies.Utils.Constants;
@@ -15,20 +19,23 @@ namespace Movies.Client.Controllers
     {
         IMoviesRepository _repository;
         AppDbContext _context;
+        IMovieService _movieService;
 
-        public MoviesController(AppDbContext dbContext, IMoviesRepository repository)
+        public MoviesController(AppDbContext dbContext, IMoviesRepository repository, IMovieService movieService)
         {
             _repository = repository;
             _context = dbContext;
+            _movieService = movieService;
         }
 
         // GET: Movies
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             IActionResult response = View(NoContent());
             try
             {
-                IEnumerable<Movie> movies = _repository.GetAllMovies();
+                LogTokenAndClaims();
+                IEnumerable<Movie> movies = await _movieService.GetMovies(); //_repository.GetAllMovies();
                 response = View(movies);
             }
             catch (Exception ex)
@@ -185,6 +192,37 @@ namespace Movies.Client.Controllers
                 response = View(BadRequest(ex.Message));
             }
             return response;
+        }
+
+        public async Task Logout()
+        {
+            try
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Exception at MoviesController > Logout : {ex.Message}");
+            }
+        }
+
+        private async void LogTokenAndClaims()
+        {
+            try
+            {
+                string? identityToken = await HttpContext.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
+                Debug.WriteLine($"--> Identity Token : {identityToken}");
+                Debug.WriteLine("--> Claim Type | Claim Value");
+                foreach (Claim claim in User.Claims)
+                {
+                    Debug.WriteLine($"{claim.Type} | {claim.Value}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Exception at MoviesController > LogTokenAndClaims : {ex.Message}");
+            }
         }
     }
 }

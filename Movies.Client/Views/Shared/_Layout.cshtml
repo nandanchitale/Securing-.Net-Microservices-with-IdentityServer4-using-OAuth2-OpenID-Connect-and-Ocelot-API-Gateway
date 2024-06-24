@@ -1,4 +1,12 @@
-﻿<!DOCTYPE html>
+﻿@{
+    string userId = "";
+    @if (User.Identity.IsAuthenticated)
+    {
+        var claimsIdentity = User.Identity as System.Security.Claims.ClaimsIdentity;
+        userId = claimsIdentity.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value.ToString();
+    }
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,6 +15,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Movies.Client.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
     <header>
@@ -29,6 +38,17 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
+                </div>
+                <div class="d-sm-inline-flex justify-content-between">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <div class="mr-3 nav-link">
+                            <p data-session-user-id="@userId" class="sessionUser">Hello @User.Identity.Name</p>
+                        </div>
+                        <div class="mr-3">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Movies" asp-action="Logout">Logout</a>
+                        </div>
+                    }
                 </div>
             </div>
         </nav>

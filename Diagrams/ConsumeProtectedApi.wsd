@@ -1,0 +1,14 @@
+@startuml Consume Protected API
+
+title Consume Protected API
+
+node "ClientAPI" as ClientAPI
+node "IdentityServer" as IdentityServer
+node "ProtectedAPI" as ProtectedAPI
+
+ClientAPI --> IdentityServer : "1> Calls token Endpoint by passing client credentials"
+IdentityServer --> ClientAPI : "2> Returns Access Token"
+ClientAPI --> ProtectedAPI : "3> Sends Request with Access Token"
+ProtectedAPI --> IdentityServer : "3.1> Validates The Token"
+ProtectedAPI --> ClientAPI : "3.2> Returns Protected Resources"
+@enduml
