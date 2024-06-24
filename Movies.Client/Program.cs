@@ -1,5 +1,6 @@
+using IdentityModel;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -19,32 +20,30 @@ Console.WriteLine($"--> IdentityServerUrl : {IdentityServerUrl}");
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Authentication with OpenIdConnect
 builder
     .Services.AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
     })
-    .AddJwtBearer(
-        JwtBearerDefaults.AuthenticationScheme,
-        options =>
-        {
-            options.Authority = IdentityServerUrl;
-            options.Audience = "moviesAPI";
-            options.RequireHttpsMetadata = false;
-            options.UseSecurityTokenValidators = false;
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                // ValidIssuer = IdentityServerUrl,
-                // ValidateAudience = true,
-                // ValidAudience = ProjectProperties.Audience
-                LogValidationExceptions = false,
-                ValidateIssuerSigningKey = false,
-                ValidateAudience = false
-            };
-        }
-    );
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
+    {
+        options.Authority = IdentityServerUrl;
+        options.RequireHttpsMetadata = false;
+        options.ClientId = "movies_mvc_client";
+        options.ClientSecret = "secret";
+        options.ResponseType = "code";
+
+        options.Scope.Add("openid");
+        options.Scope.Add("profile");
+
+        options.GetClaimsFromUserInfoEndpoint = true;
+    });
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -73,31 +72,6 @@ builder.Services.AddScoped<IMoviesRepository, MoviesRepository>();
 
 // Services
 builder.Services.AddScoped<IMovieService, MovieApiService>();
-
-// Authentication with OpenIdConnect
-builder
-    .Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-    })
-    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddOpenIdConnect(
-        OpenIdConnectDefaults.AuthenticationScheme,
-        options =>
-        {
-            options.Authority = "http://localhost:5271";
-            options.ClientId = "movies_mvc_client";
-            options.ClientSecret = "secret";
-            options.ResponseType = "code";
-            options.Scope.Add("openid");
-            options.Scope.Add("profile");
-
-            options.SaveTokens = true;
-
-            options.GetClaimsFromUserInfoEndpoint = true;
-        }
-    );
 
 // Automapper DI
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
