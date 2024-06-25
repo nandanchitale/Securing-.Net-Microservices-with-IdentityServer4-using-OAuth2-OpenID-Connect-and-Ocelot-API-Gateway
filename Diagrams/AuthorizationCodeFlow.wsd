@@ -1,0 +1,32 @@
+@startuml Authorization Code Flow
+
+title Authorization Code Flow
+
+Actor "End User" as EndUser
+archimate #Technology "User-Agnet (Browser)" as Browser <<technology-device>>
+node "Relying Party" as RelyingParty <<$aComponent>>  #Application
+node "Resource Server / API" as ProtectedAPI <<$aComponent>>  #Application
+node "OpenId Provider" as IdentityServer <<$aComponent>>  #Application
+node "ProtectedAPI" as ProtectedAPI <<$aComponent>> #Application
+
+' Positioninng
+EndUser <-right- Browser : 2
+Browser -right-> IdentityServer : 1. Client Identitfication & Redirection URI
+Browser -right-> IdentityServer : 2. User Authorization
+IdentityServer -left-> Browser : 3. Authentication Code
+
+RelyingParty -up-> Browser : 1
+Browser -down-> RelyingParty : 3
+
+RelyingParty -up-> IdentityServer : Authorization Code & Redirection URI
+IdentityServer -down-> RelyingParty : Access Token & (optional Refresh) token
+RelyingParty -up-> IdentityServer : Call to UserInfo Endpoint to obtain relevant claims
+IdentityServer -down-> RelyingParty : Claims Returned
+
+RelyingParty -> ProtectedAPI : API call with access token
+
+ProtectedAPI -> IdentityServer : Call to UserInfo Endpoint to obtain relevant claims
+IdentityServer -> ProtectedAPI : Claims returned
+
+
+@enduml

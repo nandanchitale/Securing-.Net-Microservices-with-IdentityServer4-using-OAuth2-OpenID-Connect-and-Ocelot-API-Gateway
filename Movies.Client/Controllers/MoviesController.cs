@@ -47,7 +47,7 @@ namespace Movies.Client.Controllers
         }
 
         // GET: Movies/Details/5
-        public IActionResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             IActionResult response = NotFound();
             try
@@ -55,7 +55,7 @@ namespace Movies.Client.Controllers
                 if (id is null)
                     return NotFound();
 
-                Movie movie = _repository.GetMovieById((int)id);
+                Movie movie = await _movieService.GetMovie(id.ToString());
                 if (movie is not null)
                     response = View(movie);
             }
@@ -85,8 +85,7 @@ namespace Movies.Client.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    _repository.CreateMovie(movie);
-                    _repository.SaveChanges();
+                    _movieService.CreateMovie(movie);
                     response = RedirectToAction(nameof(Index));
                 }
                 response = View(movie);

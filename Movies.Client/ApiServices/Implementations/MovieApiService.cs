@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Json;
 using IdentityModel.Client;
 using Movies.Client.ApiServices.Interfaces;
 using Movies.DataAccess.IRepository;
@@ -14,11 +16,14 @@ namespace Movies.Client.ApiServices.Implementation
         private HttpClient httpClient;
         private HttpResponseMessage response;
         HttpRequestMessage request;
-        public MovieApiService(IConfiguration configuration, IApiHandlerService apiHandlerService)
+        private readonly IHttpClientFactory _httpClientFactory;
+        public MovieApiService(IConfiguration configuration, IHttpClientFactory httpClientFactory)
         {
             _configuration = configuration;
-            _apiHandlerService = apiHandlerService ?? throw new ArgumentNullException(nameof(apiHandlerService));
-            httpClient = _apiHandlerService.CreateHttpClient(_configuration["IdentityServer:ClientId"]);
+            // _apiHandlerService = apiHandlerService ?? throw new ArgumentNullException(nameof(apiHandlerService));
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            httpClient = _httpClientFactory.CreateClient(_configuration["IdentityServer:ClientId"]);
+            httpClient.BaseAddress = new Uri(_configuration["MoviesAPI"]);
         }
 
         public async Task<Movie> CreateMovie(Movie movie)
@@ -26,16 +31,17 @@ namespace Movies.Client.ApiServices.Implementation
             Movie movieObj = null;
             try
             {
-                request = _apiHandlerService.PrepareRequestMessage(
-                   HttpMethod.Post,
-                   "/api/movies/"
-               );
+                string requestBody = JsonConvert.SerializeObject(movie);
 
-                response = await _apiHandlerService.GetApiResponse(false);
+                StringContent requestContent = new StringContent(requestBody, Encoding.UTF8, "application/json");
+
+                response = await httpClient.PostAsync(string.Empty, requestContent);
 
                 response.EnsureSuccessStatusCode();
 
                 string content = await response.Content.ReadAsStringAsync();
+
+                movieObj = JsonConvert.DeserializeObject<Movie>(content);
                 // _repository.CreateMovie(movie);
                 // _repository.SaveChanges();
                 // (bool movieStatus, movieObj) = _repository.isMovieAlreadyExists(movie.Title);
@@ -51,16 +57,10 @@ namespace Movies.Client.ApiServices.Implementation
         {
             try
             {
-                request = _apiHandlerService.PrepareRequestMessage(
-                   HttpMethod.Post,
-                   "/api/movies/"
-               );
 
-                response = await _apiHandlerService.GetApiResponse(false);
-
+                string uri = Path.Combine(_configuration["MoviesAPI"], id.ToString());
+                response = await httpClient.DeleteAsync(uri);
                 response.EnsureSuccessStatusCode();
-
-                string content = await response.Content.ReadAsStringAsync();
                 // Movie movie = _repository.GetMovieById(id);
                 // if (movie is not null)
                 // {
@@ -81,12 +81,9 @@ namespace Movies.Client.ApiServices.Implementation
             Movie movie = null;
             try
             {
-                request = _apiHandlerService.PrepareRequestMessage(
-                    HttpMethod.Post,
-                    "/api/movies/id"
-                );
+                string uri = Path.Combine(_configuration["MoviesAPI"], id.ToString());
 
-                response = await _apiHandlerService.GetApiResponse(false);
+                response = await httpClient.GetAsync(uri);
 
                 response.EnsureSuccessStatusCode();
 
@@ -106,18 +103,13 @@ namespace Movies.Client.ApiServices.Implementation
             IEnumerable<Movie> movies = null;
             try
             {
-                request = _apiHandlerService.PrepareRequestMessage(
-                    HttpMethod.Get,
-                    "/api/movies/"
-                );
+                request = new HttpRequestMessage(HttpMethod.Get, string.Empty);
 
-                response = await _apiHandlerService.GetApiResponse(false);
+                response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
 
                 response.EnsureSuccessStatusCode();
 
                 string content = await response.Content.ReadAsStringAsync();
-
-                // Deserialize object to movies list
                 movies = JsonConvert.DeserializeObject<List<Movie>>(content);
 
                 /******************************************* Method 2 *******************************************

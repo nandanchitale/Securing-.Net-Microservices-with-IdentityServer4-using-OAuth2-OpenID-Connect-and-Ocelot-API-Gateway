@@ -34,10 +34,11 @@ builder
         options.RequireHttpsMetadata = false;
         options.ClientId = builder.Configuration["IdentityServer:ClientId"];
         options.ClientSecret = builder.Configuration["IdentityServer:ClientSecret"];
-        options.ResponseType = "code";
+        options.ResponseType = "code id_token";
 
         options.Scope.Add("openid");
         options.Scope.Add("profile");
+        options.Scope.Add(builder.Configuration["IdentityServer:Scope"]);
 
         options.GetClaimsFromUserInfoEndpoint = true;
     });
@@ -63,6 +64,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // Create HttpClient used for accessing movies api
 builder.Services.AddTransient<AuthenticationDelegationHandler>();
+
 builder.Services
     .AddHttpClient(builder.Configuration["IdentityServer:ClientId"], client =>
     {
@@ -81,13 +83,15 @@ builder.Services
         client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
     });
 
-builder.Services.AddSingleton(new ClientCredentialsTokenRequest
-{
-    Address = $"{builder.Configuration["IdentityServer:Host"]}/connect/token",
-    ClientId = builder.Configuration["IdentityServer:ClientId"],
-    ClientSecret = builder.Configuration["IdentityServer:ClientSecret"],
-    Scope = builder.Configuration["IdentityServer:Scope"],
-});
+builder.Services.AddHttpContextAccessor();
+
+// builder.Services.AddSingleton(new ClientCredentialsTokenRequest
+// {
+//     Address = $"{builder.Configuration["IdentityServer:Host"]}/connect/token",
+//     ClientId = builder.Configuration["IdentityServer:ClientId"],
+//     ClientSecret = builder.Configuration["IdentityServer:ClientSecret"],
+//     Scope = builder.Configuration["IdentityServer:Scope"],
+// });
 
 var app = builder.Build();
 

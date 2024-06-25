@@ -22,8 +22,10 @@ public class Config
             new Client
             {
                 ClientId = "movies_mvc_client",
-                ClientName = "Movies MVC Web APP",
-                AllowedGrantTypes = GrantTypes.Code,
+                ClientName = "movies_mvc_client",
+                // AllowedGrantTypes = GrantTypes.ClientCredentials,
+                AllowedGrantTypes = GrantTypes.Hybrid,
+                RequirePkce = false,
                 AllowRememberConsent = false,
                 RedirectUris = new List<string>() { "http://localhost:5286/signin-oidc" },
                 PostLogoutRedirectUris = new List<string>()
@@ -34,7 +36,8 @@ public class Config
                 AllowedScopes = new List<string>
                 {
                     IdentityServerConstants.StandardScopes.OpenId,
-                    IdentityServerConstants.StandardScopes.Profile
+                    IdentityServerConstants.StandardScopes.Profile,
+                    "moviesAPI"
                 }
             }
         };
@@ -80,4 +83,3 @@ public class Config
             }
         };
 }
-
