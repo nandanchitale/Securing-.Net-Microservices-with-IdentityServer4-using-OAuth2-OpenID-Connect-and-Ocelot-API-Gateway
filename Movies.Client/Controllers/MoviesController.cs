@@ -7,9 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Movies.Client.ApiServices.Interfaces;
-using Movies.DataAccess;
-using Movies.DataAccess.IRepository;
-using Movies.Utils.Constants;
 using Movie = Movies.Models.Movies;
 
 namespace Movies.Client.Controllers
@@ -17,14 +14,10 @@ namespace Movies.Client.Controllers
     [Authorize]
     public class MoviesController : Controller
     {
-        IMoviesRepository _repository;
-        AppDbContext _context;
         IMovieService _movieService;
 
-        public MoviesController(AppDbContext dbContext, IMoviesRepository repository, IMovieService movieService)
+        public MoviesController(IMovieService movieService)
         {
-            _repository = repository;
-            _context = dbContext;
             _movieService = movieService;
         }
 
@@ -78,14 +71,14 @@ namespace Movies.Client.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("Id,Title,Genre,ReleaseDate,Owner")] Movie movie)
+        public async Task<IActionResult> Create([Bind("Id,Title,Genre,ReleaseDate,Owner")] Movie movie)
         {
             IActionResult response = BadRequest();
             try
             {
                 if (ModelState.IsValid)
                 {
-                    _movieService.CreateMovie(movie);
+                    await _movieService.CreateMovie(movie);
                     response = RedirectToAction(nameof(Index));
                 }
                 response = View(movie);
@@ -99,7 +92,7 @@ namespace Movies.Client.Controllers
         }
 
         // GET: Movies/Edit/5
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             IActionResult response = NotFound();
             try
@@ -107,7 +100,7 @@ namespace Movies.Client.Controllers
                 if (id is null)
                     return response;
 
-                Movie movie = _repository.GetMovieById((int)id);
+                Movie movie = await _movieService.GetMovie(id.ToString());
                 if (movie is not null)
                     response = View(movie);
             }
@@ -136,8 +129,7 @@ namespace Movies.Client.Controllers
                     return NotFound();
                 if (!ModelState.IsValid)
                     return View(movie);
-                _context.Update(movie);
-                _context.SaveChanges();
+                _movieService.UpdateMovie(movie);
                 response = RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -149,7 +141,7 @@ namespace Movies.Client.Controllers
         }
 
         // GET: Movies/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
             IActionResult response = NotFound();
             try
@@ -157,7 +149,7 @@ namespace Movies.Client.Controllers
                 if (id == null)
                     return response;
 
-                Movie movie = _repository.GetMovieById((int)id);
+                Movie movie = await _movieService.GetMovie(id.ToString());
 
                 if (movie == null)
                     return response;
@@ -180,9 +172,7 @@ namespace Movies.Client.Controllers
             IActionResult response = NotFound();
             try
             {
-                Movie movie = _repository.GetMovieById(id);
-                movie.Status = Status.INACTIVE;
-                _repository.SaveChanges();
+                _movieService.DeleteMovie(id);
                 response = RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -225,4 +215,3 @@ namespace Movies.Client.Controllers
         }
     }
 }
-

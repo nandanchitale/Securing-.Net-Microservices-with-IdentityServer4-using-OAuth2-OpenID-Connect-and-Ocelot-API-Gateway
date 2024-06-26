@@ -1,4 +1,3 @@
-using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +5,6 @@ using Microsoft.Net.Http.Headers;
 using Movies.Client.ApiServices.Implementation;
 using Movies.Client.ApiServices.Interfaces;
 using Movies.Client.HttpHandlers;
-using Movies.DataAccess;
 using Movies.DataAccess.IRepository;
 using Movies.DataAccess.Repository;
 
@@ -19,6 +17,9 @@ Console.WriteLine($"--> IdentityServerUrl : {IdentityServerUrl}");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Automapper DI
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // Authentication with OpenIdConnect
 builder
@@ -49,22 +50,19 @@ builder.Logging.AddConsole();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
-Console.WriteLine("--> Using InMem DB");
-_ = builder.Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("InMemoryDb"));
-
 // Repository DI
-builder.Services.AddScoped<IMoviesRepository, MoviesRepository>();
+builder.Services.AddScoped<IMovieService, MovieApiService>();
+Console.WriteLine("--> Loaded DI For MoviesRepository");
 
 // Services
 builder.Services.AddScoped<IMovieService, MovieApiService>();
-builder.Services.AddScoped<IApiHandlerService, ApiHandlerService>();
-
-// Automapper DI
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+Console.WriteLine("--> Loaded DI For MovieService");
 
 // Create HttpClient used for accessing movies api
 builder.Services.AddTransient<AuthenticationDelegationHandler>();
+Console.WriteLine("Creating AuthenticationDelegationHandler for Accessing Movies API");
 
+Console.WriteLine($"Creating HttpClient to communicate with MoviesAPI : {builder.Configuration["IdentityServer:ClientId"]}");
 builder.Services
     .AddHttpClient(builder.Configuration["IdentityServer:ClientId"], client =>
     {
@@ -74,6 +72,8 @@ builder.Services
     })
     .AddHttpMessageHandler<AuthenticationDelegationHandler>();
 
+Console.WriteLine($"Created HttpClient to communicate with MoviesAPI : {builder.Configuration["IdentityServer:ClientId"]}");
+
 // HttpClient to access Identity Server
 builder.Services
     .AddHttpClient(builder.Configuration["IdentityServer:Id"], client =>
@@ -82,16 +82,9 @@ builder.Services
         client.DefaultRequestHeaders.Clear();
         client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
     });
+Console.WriteLine($"Created HttpClient to communicate with Identity Server : {builder.Configuration["IdentityServer:Id"]}");
 
 builder.Services.AddHttpContextAccessor();
-
-// builder.Services.AddSingleton(new ClientCredentialsTokenRequest
-// {
-//     Address = $"{builder.Configuration["IdentityServer:Host"]}/connect/token",
-//     ClientId = builder.Configuration["IdentityServer:ClientId"],
-//     ClientSecret = builder.Configuration["IdentityServer:ClientSecret"],
-//     Scope = builder.Configuration["IdentityServer:Scope"],
-// });
 
 var app = builder.Build();
 
@@ -109,8 +102,6 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
-
-PrepDb.PrepPopulation(app, app.Environment.IsProduction());
 
 app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 

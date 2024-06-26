@@ -76,6 +76,7 @@ public class MoviesController : ControllerBase
                 movie = UpdateMovieData(movie, movieDetailDto);
                 if (movie is not null)
                 {
+                    _repository.SaveChanges();
 
                     MovieReadDto movieReadDto = _mapper.Map<MovieReadDto>(movie);
                     response = CreatedAtRoute(
