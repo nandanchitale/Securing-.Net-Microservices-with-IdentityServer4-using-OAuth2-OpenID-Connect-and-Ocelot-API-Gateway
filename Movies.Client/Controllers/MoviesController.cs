@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Movies.API.DTO;
 using Movies.Client.ApiServices.Interfaces;
 using Movie = Movies.Models.Movies;
 
@@ -71,17 +72,17 @@ namespace Movies.Client.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Genre,ReleaseDate,Owner")] Movie movie)
+        public IActionResult Create(MovieDetailDto movie)
         {
             IActionResult response = BadRequest();
             try
             {
                 if (ModelState.IsValid)
                 {
-                    await _movieService.CreateMovie(movie);
+                    _movieService.CreateMovie(movie);
                     response = RedirectToAction(nameof(Index));
                 }
-                response = View(movie);
+                else response = View(movie);
             }
             catch (Exception ex)
             {

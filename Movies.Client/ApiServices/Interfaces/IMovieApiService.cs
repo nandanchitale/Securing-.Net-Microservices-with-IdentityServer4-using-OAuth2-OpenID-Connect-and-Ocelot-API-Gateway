@@ -1,3 +1,4 @@
+using Movies.API.DTO;
 using Movie = Movies.Models.Movies;
 
 namespace Movies.Client.ApiServices.Interfaces
@@ -6,7 +7,7 @@ namespace Movies.Client.ApiServices.Interfaces
     {
         Task<IEnumerable<Movie>> GetMovies();
         Task<Movie> GetMovie(string id);
-        Task<Movie> CreateMovie(Movie movie);
+        Task<Movie> CreateMovie(MovieDetailDto movie);
         Task<Movie> UpdateMovie(Movie movie);
         Task DeleteMovie(int id);
     }

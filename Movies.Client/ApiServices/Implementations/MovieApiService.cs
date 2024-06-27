@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using IdentityModel.Client;
+using Movies.API.DTO;
 using Movies.Client.ApiServices.Interfaces;
 using Movies.DataAccess.IRepository;
 using Movies.Utils.Constants;
@@ -24,7 +25,7 @@ namespace Movies.Client.ApiServices.Implementation
             httpClient.BaseAddress = new Uri(_configuration["MoviesAPI"]);
         }
 
-        public async Task<Movie> CreateMovie(Movie movie)
+        public async Task<Movie> CreateMovie(MovieDetailDto movie)
         {
             Movie movieObj = null;
             try
