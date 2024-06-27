@@ -26,6 +26,11 @@ class AuthenticationDelegationHandler : DelegatingHandler
         try
         {
             string? accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync(OpenIdConnectParameterNames.AccessToken);
+            if (!string.IsNullOrWhiteSpace(accessToken))
+            {
+                request.SetBearerToken(accessToken);
+            }
+
             return await base.SendAsync(request, cancellationToken);
 
             //     HttpClient httpClient = _httpClientFactory.CreateClient(_configuration["IdentityServer:Id"]);

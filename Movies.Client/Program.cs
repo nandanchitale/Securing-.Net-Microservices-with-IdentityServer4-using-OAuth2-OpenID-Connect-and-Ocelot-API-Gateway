@@ -1,6 +1,8 @@
+using IdentityModel;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Movies.Client.ApiServices.Implementation;
 using Movies.Client.ApiServices.Interfaces;
@@ -42,6 +44,15 @@ builder
         options.Scope.Add(builder.Configuration["IdentityServer:Scope"]);
 
         options.GetClaimsFromUserInfoEndpoint = true;
+
+        options.SaveTokens = true;
+        options.GetClaimsFromUserInfoEndpoint = true;
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            NameClaimType = JwtClaimTypes.GivenName,
+            RoleClaimType = JwtClaimTypes.Role
+        };
     });
 
 builder.Logging.ClearProviders();
