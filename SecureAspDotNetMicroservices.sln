@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Movies.Utils", "Movies.Util
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Movies.DataAccess", "Movies.DataAccess\Movies.DataAccess.csproj", "{52756966-68AB-40D2-A718-39570819C629}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", "ApiGateway\ApiGateway.csproj", "{1CDB1CAE-49C9-48CA-919C-4B8C37FA62C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{52756966-68AB-40D2-A718-39570819C629}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52756966-68AB-40D2-A718-39570819C629}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52756966-68AB-40D2-A718-39570819C629}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CDB1CAE-49C9-48CA-919C-4B8C37FA62C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CDB1CAE-49C9-48CA-919C-4B8C37FA62C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CDB1CAE-49C9-48CA-919C-4B8C37FA62C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CDB1CAE-49C9-48CA-919C-4B8C37FA62C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

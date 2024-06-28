@@ -1,4 +1,5 @@
 using IdentityServer4;
+using IdentityServerHost.Quickstart.UI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,8 @@ builder
     .AddInMemoryClients(Config.clients)
     .AddInMemoryApiScopes(Config.apiScopes)
     .AddInMemoryIdentityResources(Config.identityResources)
-    .AddTestUsers(Config.testUsers)
+    .AddTestUsers(TestUsers.Users)
+    // .AddTestUsers(Config.testUsers)
     .AddDeveloperSigningCredential();
 
 // Configure cookie policy

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Movies.API.DTO;
 using Movies.Client.ApiServices.Interfaces;
+using Movies.Models;
 using Movie = Movies.Models.Movies;
 
 namespace Movies.Client.Controllers
@@ -28,7 +29,7 @@ namespace Movies.Client.Controllers
             IActionResult response = View(NoContent());
             try
             {
-                LogTokenAndClaims();
+                await LogTokenAndClaims();
                 IEnumerable<Movie> movies = await _movieService.GetMovies(); //_repository.GetAllMovies();
                 response = View(movies);
             }
@@ -184,6 +185,22 @@ namespace Movies.Client.Controllers
             return response;
         }
 
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> Admin()
+        {
+            IActionResult response = NotFound();
+            try
+            {
+                UserInfoModel userInfo = await _movieService.GetUserInfo();
+                response = View(userInfo);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Exception at MoviesController > Admin : {ex.Message}");
+            }
+            return response;
+        }
+
         public async Task Logout()
         {
             try
@@ -197,7 +214,7 @@ namespace Movies.Client.Controllers
             }
         }
 
-        private async void LogTokenAndClaims()
+        private async Task LogTokenAndClaims()
         {
             try
             {

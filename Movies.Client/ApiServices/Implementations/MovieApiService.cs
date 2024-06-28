@@ -1,9 +1,12 @@
 using System.Text;
 using System.Text.Json;
 using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Movies.API.DTO;
 using Movies.Client.ApiServices.Interfaces;
 using Movies.DataAccess.IRepository;
+using Movies.Models;
 using Movies.Utils.Constants;
 using Newtonsoft.Json;
 using Movie = Movies.Models.Movies;
@@ -17,9 +20,15 @@ namespace Movies.Client.ApiServices.Implementation
         private HttpResponseMessage response;
         HttpRequestMessage request;
         private readonly IHttpClientFactory _httpClientFactory;
-        public MovieApiService(IConfiguration configuration, IHttpClientFactory httpClientFactory)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public MovieApiService(
+            IConfiguration configuration,
+            IHttpClientFactory httpClientFactory,
+            IHttpContextAccessor httpContextAccessor
+        )
         {
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
             httpClient = _httpClientFactory.CreateClient(_configuration["IdentityServer:ClientId"]);
             httpClient.BaseAddress = new Uri(_configuration["MoviesAPI"]);
@@ -35,7 +44,6 @@ namespace Movies.Client.ApiServices.Implementation
                 response = await httpClient.PostAsync(string.Empty, requestContent);
                 response.EnsureSuccessStatusCode();
                 string content = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"--> MovieApiService -> CreateMovie : ${content}");
                 movieObj = JsonConvert.DeserializeObject<Movie>(content);
             }
             catch (Exception ex)
@@ -89,7 +97,6 @@ namespace Movies.Client.ApiServices.Implementation
                 response.EnsureSuccessStatusCode();
                 string content = await response.Content.ReadAsStringAsync();
                 movies = JsonConvert.DeserializeObject<List<Movie>>(content);
-                Console.WriteLine($"--> MovieApiService -> GetMovies : ${content}");
             }
             catch (Exception ex)
             {
@@ -108,7 +115,6 @@ namespace Movies.Client.ApiServices.Implementation
                 response = await httpClient.PutAsync(movie.Id.ToString(), requestContent);
                 response.EnsureSuccessStatusCode();
                 string content = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"--> MovieApiService -> UpdateMovie : ${content}");
                 movieObj = JsonConvert.DeserializeObject<Movie>(content);
 
             }
@@ -117,6 +123,43 @@ namespace Movies.Client.ApiServices.Implementation
                 Console.WriteLine($"Exception at MovieApiService > UpdateMovie() => {ex.Message}");
             }
             return await Task.FromResult(movie);
+        }
+
+        public async Task<UserInfoModel> GetUserInfo()
+        {
+            UserInfoModel userInfoModel = null;
+            try
+            {
+                HttpClient idpClient = _httpClientFactory.CreateClient(_configuration["IdentityServer:Id"]);
+                DiscoveryDocumentResponse discoveryDocumentResponse = await idpClient.GetDiscoveryDocumentAsync();
+                if (discoveryDocumentResponse.IsError) throw new HttpRequestException("Something went wrong while requesting Access Token");
+                string? accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync(
+                    OpenIdConnectParameterNames.AccessToken
+                );
+
+                UserInfoResponse userInfoResponse = await idpClient.GetUserInfoAsync(
+                    new UserInfoRequest
+                    {
+                        Address = discoveryDocumentResponse.UserInfoEndpoint,
+                        Token = accessToken
+                    }
+                );
+
+                if (userInfoResponse.IsError) throw new HttpRequestException("Something went wrong while requesting User Info");
+
+                Dictionary<string, string> userInfoDict = new Dictionary<string, string>();
+                foreach (var claim in userInfoResponse.Claims)
+                {
+                    userInfoDict.Add(claim.Type, claim.Value);
+                }
+
+                userInfoModel = new UserInfoModel(userInfoDict);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception at MovieApiService > GetUserInfo() => {ex.Message}");
+            }
+            return await Task.FromResult(userInfoModel);
         }
     }
 }

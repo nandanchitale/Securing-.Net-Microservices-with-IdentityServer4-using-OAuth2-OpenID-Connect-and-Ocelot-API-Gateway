@@ -1,0 +1,30 @@
+@model Movies.Models.UserInfoModel;
+
+@{
+    ViewData["Title"] = "Admin";
+}
+
+<h1>Admin</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Claim Type</th>
+        </tr>
+        <tr>
+            <th>Claim Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.UserInfoDict){
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Key)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem=> item.Value)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -37,7 +37,10 @@ public class Config
                 {
                     IdentityServerConstants.StandardScopes.OpenId,
                     IdentityServerConstants.StandardScopes.Profile,
-                    "moviesAPI"
+                    IdentityServerConstants.StandardScopes.Address,
+                    IdentityServerConstants.StandardScopes.Email,
+                    "moviesAPI",
+                    "roles"
                 }
             }
         };
@@ -46,13 +49,13 @@ public class Config
         new ApiScope[]
         {
             // Name, Description
-            new ApiScope(name: "moviesAPI")
+            new ApiScope("moviesAPI", "Movie API"),
         };
 
     public static IEnumerable<ApiResource> apiResources =>
         new ApiResource[]
         {
-            new ApiResource(name: "moviesAPI") { Scopes = new List<string> { "moviesAPI" } }
+            // new ApiResource(name: "moviesAPI") { Scopes = new List<string> { "moviesAPI" } }
         };
 
     public static IEnumerable<IdentityResource> identityResources =>
@@ -60,11 +63,13 @@ public class Config
         {
             new IdentityResources.OpenId(),
             new IdentityResources.Profile(),
-            new IdentityResource
-            {
-                Name = "role",
-                UserClaims = new List<string> { "role" }
-            }
+            new IdentityResources.Email(),
+            new IdentityResources.Address(),
+            new IdentityResource(
+                    "roles",
+                    "Your role(s)",
+                    new List<string>() { "role" }
+            )
         };
 
     public static List<TestUser> testUsers =>
