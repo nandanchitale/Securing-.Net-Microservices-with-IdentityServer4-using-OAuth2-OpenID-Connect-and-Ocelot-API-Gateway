@@ -1,21 +1,22 @@
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Debug);
+
+// Load the ocelot.json configuration file
+builder.Configuration.AddJsonFile("ocelot.Developement.json", optional: false, reloadOnChange: true);
+
 string IdentityServerUrl = builder.Configuration.GetSection("IdentityServer:Host").Value;
 
 // Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-// Add services to the container.
 builder.Services.AddControllers();
-
-builder.Configuration.AddJsonFile("Ocelot.json");
 
 string AuthenticationProviderKey = "IdentityApiKey";
 
@@ -31,7 +32,8 @@ builder.Services
         };
     });
 
-builder.Services.AddOcelot();
+// Add Ocelot services
+builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
 
@@ -44,11 +46,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
 });
 
-await app.UseOcelot();
+// Use Ocelot
+await app.UseOcelot(); // Updated
 
 app.Run();

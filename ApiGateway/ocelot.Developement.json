@@ -1,0 +1,30 @@
+{
+    "Routes": [
+        {
+            // Movies API : http://localhost:5089/api/movies
+            "DownstreamPathTemplate": "/api/Movies/{everything}",
+            "DownstreamScheme": "http", // corrected from https to http
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 5089
+                }
+            ],
+            "UpstreamPathTemplate": "/gateway/movies/{everything}",
+            "UpstreamHttpMethod": [
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE"
+            ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "IdentityApiKey",
+                "AllowedScopes": []
+            }
+        }
+    ],
+    "GlobalConfiguration": {
+        "BaseUrl": "http://localhost:5192" // Ensure this matches your Ocelot base URL
+    }
+}
